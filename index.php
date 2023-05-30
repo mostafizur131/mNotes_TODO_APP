@@ -13,6 +13,7 @@
 
     <?php
     $insert = false;
+    $update = false;
     //Database Connection 
     $servername = "localhost";
     $username = "root";
@@ -27,17 +28,49 @@
     }
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        // Retrieve data from the form
-        $title = $_POST["title"];
-        $description = $_POST["description"];
+        if (isset($_POST['noEdit'])) {
+            // Update the record
+            $no = $_POST['noEdit'];
+            $title = $_POST["titleEdit"];
+            $description = $_POST["descriptionEdit"];
 
-        // SQL query to insert data
-        $sql = "INSERT INTO `note` (`title`, `description`) VALUES ( '$title', '$description')";
-        //$result = mysqli_query($conn, $sql);
-        if ($conn->query($sql) === true) {
-            $insert = true;
+            // SQL query to insert data
+            $sql = "UPDATE `note` SET `title` = '$title', `description` = '$description' WHERE `note`.`no` = $no";
+            $result = mysqli_query($conn, $sql);
+            if ($result) {
+                $update = true;
+            }
+            // Update Message
+            if ($update) {
+                echo '<div class="z-3 position-absolute top-[50px] start-50 w-25 alert alert-success alert-dismissible fade show" role="alert">Data Updated successfully.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>';
+            } else {
+                echo '<div class="z-3 position-absolute top-[50px] start-50 w-25 alert alert-danger alert-dismissible fade show" role="alert">' . 'Error Updating data : ' . $conn->error . '
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>';
+            }
         } else {
-            $insert = false;
+            // Retrieve data from the form
+            $title = $_POST["title"];
+            $description = $_POST["description"];
+
+            // SQL query to insert data
+            $sql = "INSERT INTO `note` (`title`, `description`) VALUES ( '$title', '$description')";
+            //$result = mysqli_query($conn, $sql);
+            if ($conn->query($sql) === true) {
+                $insert = true;
+            }
+            // Insert Message
+            if ($insert) {
+                echo '<div class="z-3 position-absolute top-[50px] start-50 w-25 alert alert-success alert-dismissible fade show" role="alert">Data inserted successfully.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>';
+            } else {
+                echo '<div class="z-3 position-absolute top-[50px] start-50 w-25 alert alert-danger alert-dismissible fade show" role="alert">' . 'Error inserting data : ' . $conn->error . '
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>';
+            }
         }
     }
 
@@ -59,11 +92,23 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="mNotesModal">Edit Note!</h1>
+                    <h1 class="modal-title fs-5" id="mNotesModal">Update This Note!</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    ...
+
+                    <form action="/learnphp/crud/index.php" method="POST">
+                        <input type="hidden" name="noEdit" id="noEdit">
+                        <div class="mb-3">
+                            <label for="titleEdit" class="form-label">Title</label>
+                            <input type="text" name="titleEdit" class="form-control" id="titleEdit">
+                        </div>
+                        <div class="mb-3">
+                            <label for="descriptionEdit" class="form-label">Description</label>
+                            <textarea class="form-control" name="descriptionEdit" id="descriptionEdit" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Note</button>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -74,7 +119,7 @@
     </div>
 
     <!-- Heder Section -->
-    <header>
+    <header class="position-relative">
         <!-- Navigation  -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
@@ -101,17 +146,6 @@
                 </div>
             </div>
         </nav>
-        <?php
-        if ($insert) {
-            echo '<div class="position-absolute top-[30px] start-50 w-25 alert alert-success alert-dismissible fade show" role="alert">Data inserted successfully.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>';
-        } else {
-            echo '<div class="position-absolute top-[30px] start-50 w-25 alert alert-danger alert-dismissible fade show" role="alert">' . 'Error inserting data : ' . $conn->error . '
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>';
-        }
-        ?>
     </header>
 
 
@@ -119,10 +153,10 @@
     <div class="container">
         <div class="row justify-content-md-center">
             <div class="col-md-8">
-                <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
+                <form action="/learnphp/crud/index.php" method="POST">
                     <h2 class="mt-5 mb-3">Add your note!</h2>
                     <div class="mb-3">
-                        <label for="title" class="form-label">Tile</label>
+                        <label for="title" class="form-label">Title</label>
                         <input type="text" name="title" class="form-control" id="title">
                     </div>
                     <div class="mb-3">
@@ -159,12 +193,12 @@
                             $no = 0;
                             while ($row = mysqli_fetch_assoc($data)) {
                                 $no++;
-                                echo '<tr>' . '<th scope="row">' . $no . '</th>'
-                                    . '<td >' . $row["title"] . '</td>'
-                                    . '<td >' . $row["description"] . '</td>'
-                                    . '<td >' . $row["time"] . '</td>'
-                                    . '<td> <button class="btn btn-sm btn-primary edit" >Edit</button> <button class="btn btn-sm btn-primary">Delete</button></td>' .
-                                    '</tr>';
+                                echo "<tr>" . "<th scope='row'>" . $no . "</th>"
+                                    . "<td >" . $row["title"] . "</td>"
+                                    . "<td >" . $row["description"] . "</td>"
+                                    . "<td >" . $row["time"] . "</td>"
+                                    . "<td> <button id=" . $row['no'] . " class='btn btn-sm btn-primary edit' >Edit</button> <button class='btn btn-sm btn-primary'>Delete</button></td>" .
+                                    "</tr>";
                             }
                         }
                         ?>
@@ -190,7 +224,11 @@
                 const tr = e.target.parentNode.parentNode;
                 const title = tr.getElementsByTagName("td")[0].innerText;
                 const description = tr.getElementsByTagName("td")[1].innerText;
-                console.log(title, description);
+                titleEdit.value = title;
+                descriptionEdit.value = description
+                noEdit.value = e.target.id;
+                console.log(e.target.id);
+                $('#mNotesModal').modal('toggle');
             })
         });
     </script>
