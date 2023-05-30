@@ -49,6 +49,30 @@
 </head>
 
 <body>
+    <!-- Button trigger modal -->
+    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#mNotesModal">
+        Edit
+    </button> -->
+
+    <!-- Modal -->
+    <div class="modal fade" id="mNotesModal" tabindex="-1" aria-labelledby="mNotesModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="mNotesModal">Edit Note!</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Heder Section -->
     <header>
         <!-- Navigation  -->
@@ -135,14 +159,12 @@
                             $no = 0;
                             while ($row = mysqli_fetch_assoc($data)) {
                                 $no++;
-                                echo '<tr>
-                            <th scope="row">' . $no . '</th>'
-                                    . '<th >' . $row["title"] . '</th>'
-                                    . '<th >' . $row["description"] . '</th>'
-                                    . '<th >' . $row["time"] . '</th>'
-                                    . '<th>' . "Edit" . '</th>'
-
-                                    . '</tr>';
+                                echo '<tr>' . '<th scope="row">' . $no . '</th>'
+                                    . '<td >' . $row["title"] . '</td>'
+                                    . '<td >' . $row["description"] . '</td>'
+                                    . '<td >' . $row["time"] . '</td>'
+                                    . '<td> <button class="btn btn-sm btn-primary edit" >Edit</button> <button class="btn btn-sm btn-primary">Delete</button></td>' .
+                                    '</tr>';
                             }
                         }
                         ?>
@@ -159,6 +181,17 @@
     <script>
         $(document).ready(function() {
             $('#myTable').DataTable();
+        });
+
+        // Edit Functionality 
+        const edits = document.getElementsByClassName("edit");
+        Array.from(edits).forEach(element => {
+            element.addEventListener("click", e => {
+                const tr = e.target.parentNode.parentNode;
+                const title = tr.getElementsByTagName("td")[0].innerText;
+                const description = tr.getElementsByTagName("td")[1].innerText;
+                console.log(title, description);
+            })
         });
     </script>
 </body>
