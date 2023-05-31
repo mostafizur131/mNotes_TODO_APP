@@ -14,6 +14,7 @@
     <?php
     $insert = false;
     $update = false;
+    $delete = false;
     //Database Connection 
     $servername = "localhost";
     $username = "root";
@@ -27,6 +28,25 @@
         die("Connection Failed" . $conn->connect_error);
     }
 
+    // Delete Data from database
+    if (isset($_GET['delete'])) {
+        $no = $_GET['delete'];
+        $sql = "DELETE FROM `note` WHERE `note`.`no` = $no";
+        $result = mysqli_query($conn, $sql);
+        $delete = true;
+    }
+    // Delete Message
+    if ($delete) {
+        echo '<div class="z-3 position-absolute top-[50px] start-50 w-25 alert alert-success alert-dismissible fade show" role="alert">Data Deleted successfully.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>';
+    } else {
+        echo '<div class="z-3 position-absolute top-[50px] start-50 w-25 alert alert-danger alert-dismissible fade show" role="alert">' . 'Error Deleting data : ' . $conn->error . '
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>';
+    }
+
+    // Insert and Update Data
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (isset($_POST['noEdit'])) {
             // Update the record
@@ -97,7 +117,7 @@
                 </div>
                 <div class="modal-body">
 
-                    <form action="/learnphp/crud/index.php" method="POST">
+                    <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
                         <input type="hidden" name="noEdit" id="noEdit">
                         <div class="mb-3">
                             <label for="titleEdit" class="form-label">Title</label>
@@ -112,7 +132,6 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
                 </div>
             </div>
         </div>
@@ -153,7 +172,7 @@
     <div class="container">
         <div class="row justify-content-md-center">
             <div class="col-md-8">
-                <form action="/learnphp/crud/index.php" method="POST">
+                <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
                     <h2 class="mt-5 mb-3">Add your note!</h2>
                     <div class="mb-3">
                         <label for="title" class="form-label">Title</label>
@@ -197,7 +216,7 @@
                                     . "<td >" . $row["title"] . "</td>"
                                     . "<td >" . $row["description"] . "</td>"
                                     . "<td >" . $row["time"] . "</td>"
-                                    . "<td> <button id=" . $row['no'] . " class='btn btn-sm btn-primary edit' >Edit</button> <button class='btn btn-sm btn-primary'>Delete</button></td>" .
+                                    . "<td> <button id=" . $row['no'] . " class='btn btn-sm btn-primary edit' >Edit</button> <button id=d" . $row['no'] . " class='btn btn-sm btn-danger delete' >Delete</button></td>" .
                                     "</tr>";
                             }
                         }
@@ -217,7 +236,7 @@
             $('#myTable').DataTable();
         });
 
-        // Edit Functionality 
+        // Update Data Functionality 
         const edits = document.getElementsByClassName("edit");
         Array.from(edits).forEach(element => {
             element.addEventListener("click", e => {
@@ -230,6 +249,20 @@
                 console.log(e.target.id);
                 $('#mNotesModal').modal('toggle');
             })
+        });
+
+        // Delete Data Functionality
+
+        const deletes = document.getElementsByClassName("delete");
+        Array.from(deletes).forEach(element => {
+            element.addEventListener("click", e => {
+                const no = e.target.id.substr(1, ); //Extract id from button
+                if (confirm("Press A Button")) {
+                    window.location = `/learnphp/crud/index.php?delete=${no}`;
+                } else {
+                    console.log("No");
+                }
+            });
         });
     </script>
 </body>
